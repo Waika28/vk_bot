@@ -2,8 +2,6 @@ defmodule VkBot.LongpollServer do
   alias VkBot.Longpoll
   use GenStage
 
-  @message_queue_limit 20
-
   def start_link(options \\ []) do
     GenStage.start_link(__MODULE__, nil, options)
   end
