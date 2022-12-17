@@ -21,7 +21,7 @@ defmodule VkBot.CommandsManager do
     end
   end
 
-  defmacro defcommand([on_text: text], do: body) do
+  defmacro defcommand(arg, [on_text: text], do: body) do
     quote do
       def predicate(event) do
         text = fetch_text(event)
@@ -31,7 +31,7 @@ defmodule VkBot.CommandsManager do
         |> String.starts_with?(unquote(text))
       end
 
-      def handle_event(event) do
+      def handle_event(unquote(arg)) do
         unquote(body)
       end
     end
