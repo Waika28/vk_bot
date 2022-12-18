@@ -15,7 +15,6 @@ defmodule VkBot.MixProject do
   def application do
     [
       extra_applications: [:logger],
-      mod: {VkBot.Application, []}
     ]
   end
 
@@ -24,7 +23,6 @@ defmodule VkBot.MixProject do
     [
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.4"},
-      {:gen_stage, "~> 1.0"}
     ]
   end
 end

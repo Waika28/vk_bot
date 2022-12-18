@@ -1,26 +1,36 @@
 defmodule VkBot.Bot do
   alias VkBot.CommandsManager
-  alias VkBot.LongpollServer
 
   defmacro __using__(_opts) do
     quote do
       use CommandsManager
-      use GenStage
+      use GenServer
 
       def start_link(options \\ []) do
-        GenStage.start_link(__MODULE__, nil, options)
+        GenServer.start_link(__MODULE__, nil, options)
       end
 
       @impl true
-      def init(_init_arg) do
-        {:consumer, nil, subscribe_to: [{LongpollServer, max_demand: 1}]}
+      def init(_state) do
+        send(self(), :init)
+        send(self(), :process)
+        {:ok, nil}
       end
 
       @impl true
-      def handle_events(events, _from, _state) do
-        Enum.each(events, &Task.start(fn -> apply(__MODULE__, :handle_event, [&1]) end))
+      def handle_info(:init, nil) do
+        {:noreply, VkBot.Longpoll.new()}
+      end
 
-        {:noreply, [], nil}
+      @impl true
+      def handle_info(:process, state) do
+        new_state = VkBot.Longpoll.wait_updates(state)
+
+        new_state.updates
+        |> Enum.each(&Task.start(fn -> apply(__MODULE__, :handle_event, [&1]) end))
+
+        send(self(), :process)
+        {:noreply, new_state}
       end
     end
   end
