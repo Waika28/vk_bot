@@ -1,5 +1,5 @@
 defmodule VkBot.Attachment do
-  @can_download ~w[photo video audio doc sticker]
+  @can_download ~w[photo video audio audio_message doc sticker]
 
   defstruct ~w[type object url file ext]a
 
@@ -48,5 +48,11 @@ defmodule VkBot.Attachment do
     attachment
     |> Map.put(:url, Map.fetch!(object, "url"))
     |> Map.put(:ext, Map.fetch!(object, "ext"))
+  end
+
+  defp get_url(%__MODULE__{type: :audio_message, object: object} = attachment) do
+    attachment
+    |> Map.put(:url, Map.fetch!(object, "link_mp3"))
+    |> Map.put(:ext, "mp3")
   end
 end
