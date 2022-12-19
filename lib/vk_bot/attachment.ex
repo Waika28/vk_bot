@@ -1,14 +1,15 @@
 defmodule VkBot.Attachment do
   @can_download ~w[photo audio audio_message doc sticker]
 
-  defstruct ~w[type object url file ext]a
+  defstruct ~w[type object url file ext can_download?]a
 
-  def new(%{"type" => type} = attachment) when type in @can_download do
+  def new(%{"type" => type} = attachment) do
     object = attachment[type]
 
     %__MODULE__{
       type: String.to_atom(type),
-      object: object
+      object: object,
+      can_download?: type in @can_download
     }
   end
 
@@ -17,6 +18,8 @@ defmodule VkBot.Attachment do
     |> get_url()
     |> download_by_url()
   end
+
+  defp download_by_url(%__MODULE__{can_download?: false} = attachment), do: attachment
 
   defp download_by_url(%__MODULE__{url: url} = attachment) do
     body =
@@ -61,4 +64,6 @@ defmodule VkBot.Attachment do
     |> Map.put(:url, Map.fetch!(object, "url"))
     |> Map.put(:ext, "mp3")
   end
+
+  defp get_url(%__MODULE__{can_download?: false} = attachment), do: attachment
 end
