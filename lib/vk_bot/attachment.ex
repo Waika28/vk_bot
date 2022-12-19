@@ -1,7 +1,7 @@
 defmodule VkBot.Attachment do
   @can_download ~w[photo video audio doc sticker]
 
-  defstruct ~w[type object url file]a
+  defstruct ~w[type object url file ext]a
 
   def new(%{"type" => type} = attachment) when type in @can_download do
     object = attachment[type]
@@ -20,7 +20,7 @@ defmodule VkBot.Attachment do
 
   defp download_by_url(%__MODULE__{url: url} = attachment) do
     body =
-      HTTPoison.get!(url)
+      HTTPoison.request!(:get, url, "", [], follow_redirect: true)
       |> Map.fetch!(:body)
 
     Map.put(attachment, :file, body)
@@ -42,5 +42,11 @@ defmodule VkBot.Attachment do
       |> Map.fetch!("url")
 
     Map.put(attachment, :url, url)
+  end
+
+  defp get_url(%__MODULE__{type: :doc, object: object} = attachment) do
+    attachment
+    |> Map.put(:url, Map.fetch!(object, "url"))
+    |> Map.put(:ext, Map.fetch!(object, "ext"))
   end
 end
