@@ -34,4 +34,13 @@ defmodule VkBot.Attachment do
 
     Map.put(attachment, :url, url)
   end
+
+  defp get_url(%__MODULE__{type: :sticker, object: object} = attachment) do
+    url =
+      object["images"]
+      |> Enum.max_by(fn s -> s["width"] * s["height"] end)
+      |> Map.fetch!("url")
+
+    Map.put(attachment, :url, url)
+  end
 end
