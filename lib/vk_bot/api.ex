@@ -1,6 +1,6 @@
 defmodule VkBot.Api do
 
-  @token Application.compile_env!(:vk_bot, :token)
+  @token Application.compile_env(:vk_bot, :token)
   @version "5.131"
 
   @auth_fields %{"access_token" => @token, "v" => @version}

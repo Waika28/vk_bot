@@ -11,7 +11,7 @@ defmodule VkBot.Longpoll do
           valid: boolean()
         }
 
-  @group_id Application.compile_env!(:vk_bot, :group_id)
+  @group_id Application.compile_env(:vk_bot, :group_id)
 
   alias VkBot.Api
 
