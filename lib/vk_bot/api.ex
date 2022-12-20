@@ -1,10 +1,13 @@
 defmodule VkBot.Api do
-
-  @token Application.compile_env(:vk_bot, :token)
   @version "5.131"
 
-  @auth_fields %{"access_token" => @token, "v" => @version}
   @api_server URI.new!("https://api.vk.com/method/")
+
+  def auth_fields() do
+    token = Application.get_env(:vk_bot, :vk_bot)[:token]
+
+    %{"access_token" => token, "v" => @version}
+  end
 
   def send_request(url) do
     url
@@ -22,7 +25,7 @@ defmodule VkBot.Api do
 
   def exec_method(method, params \\ %{}) when is_binary(method) do
     query =
-      Map.merge(params, @auth_fields)
+      Map.merge(params, auth_fields())
       |> URI.encode_query()
 
     URI.merge(@api_server, method)

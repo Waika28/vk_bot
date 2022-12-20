@@ -11,15 +11,17 @@ defmodule VkBot.Longpoll do
           valid: boolean()
         }
 
-  @group_id Application.compile_env(:vk_bot, :group_id)
-
   alias VkBot.Api
+
+  def group_id() do
+    Application.get_env(:vk_bot, :vk_bot)[:group_id]
+  end
 
   @spec new :: t
   def new() do
     Api.exec_method(
       "groups.getLongPollServer",
-      %{"group_id" => @group_id}
+      %{"group_id" => group_id()}
     )
     |> parse_vk_response_to_struct()
   end
