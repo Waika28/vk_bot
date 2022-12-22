@@ -1,15 +1,16 @@
 defmodule VkBot.Attachment do
   @can_download ~w[photo audio audio_message doc sticker]
 
-  defstruct ~w[type object url file ext can_download?]a
+  defstruct ~w[type object url file ext can_download? gif_as_mp4]a
 
-  def new(%{"type" => type} = attachment) do
+  def new(%{"type" => type} = attachment, opts \\ []) do
     object = attachment[type]
 
     %__MODULE__{
       type: String.to_atom(type),
       object: object,
-      can_download?: type in @can_download
+      can_download?: type in @can_download,
+      gif_as_mp4: Keyword.get(opts, :gif_as_mp4, false)
     }
   end
 
@@ -45,6 +46,21 @@ defmodule VkBot.Attachment do
       |> Map.fetch!("url")
 
     Map.put(attachment, :url, url)
+  end
+
+  defp get_url(
+         %__MODULE__{type: :doc, object: %{"ext" => "gif"} = object, gif_as_mp4: true} =
+           attachment
+       ) do
+    url =
+      object
+      |> Map.fetch!("preview")
+      |> Map.fetch!("video")
+      |> Map.fetch!("src")
+
+    attachment
+    |> Map.put(:url, url)
+    |> Map.put(:ext, "mp4")
   end
 
   defp get_url(%__MODULE__{type: :doc, object: object} = attachment) do
