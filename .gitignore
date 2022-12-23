@@ -24,3 +24,6 @@ vk_bot-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Ignore secrets files
+config/*.secret.exs

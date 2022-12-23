@@ -14,7 +14,9 @@ defmodule VkBot.Longpoll do
   alias VkBot.Api
 
   def group_id() do
-    Application.get_env(:vk_bot, :vk_bot)[:group_id]
+    Api.exec_method("groups.getById")
+    |> hd()
+    |> Map.fetch!("id")
   end
 
   @spec new :: t

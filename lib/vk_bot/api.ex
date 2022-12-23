@@ -4,7 +4,7 @@ defmodule VkBot.Api do
   @api_server URI.new!("https://api.vk.com/method/")
 
   def auth_fields() do
-    token = Application.get_env(:vk_bot, :vk_bot)[:token]
+    token = Application.get_env(:vk_bot, :token)
 
     %{"access_token" => token, "v" => @version}
   end
