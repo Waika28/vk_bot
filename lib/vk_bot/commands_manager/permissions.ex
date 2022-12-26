@@ -1,0 +1,25 @@
+defmodule VkBot.CommandsManager.Permissions do
+  def check_permissions(response, permissions \\ []) do
+    permissions
+    |> Enum.reduce(:cont, fn
+      permission, :cont -> check_permission(response, permission)
+      _permission, {:halt, _response} = halted -> halted
+    end)
+  end
+
+  defp check_permission(response, {:only_admin, true}) do
+    %{"peer_id" => peer_id, "from_id" => from_id} = response.message
+
+    is_admin =
+      VkBot.Api.exec_method("messages.getConversationMembers", %{"peer_id" => peer_id})
+      |> Map.fetch!("items")
+      |> Enum.find(%{}, fn user -> Map.fetch!(user, "member_id") == from_id end)
+      |> Map.get("is_admin", false)
+
+    if is_admin,
+      do: :cont,
+      else:
+        {:halt,
+         VkBot.Response.reply_message(response, "Комманда доступа только для администраторов")}
+  end
+end

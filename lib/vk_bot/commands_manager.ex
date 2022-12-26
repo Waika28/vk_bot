@@ -1,101 +1,60 @@
 defmodule VkBot.CommandsManager do
-  @default_options %{only_admin: false, in: :pm}
+  alias VkBot.Response
+  alias VkBot.CommandsManager.Permissions
+  alias VkBot.CommandsManager.Predicates
+
+  defdelegate reply_message(response, text), to: Response
 
   def handle_event(module, event) do
-    case Enum.find(apply(module, :commands, []), :not_found, &apply(&1, :predicate, [event])) do
+    response =
+      event
+      |> Map.fetch!("object")
+      |> Map.fetch!("message")
+      |> VkBot.Response.new()
+
+    case Enum.find(commands_list(module), :not_found, &command_predicate(&1, response)) do
       :not_found ->
         nil
 
-      command ->
-        apply(command, :handle_event, [event])
-        |> handle_response(event)
+      command_module ->
+        command_handle(command_module, response)
+        |> handle_response()
     end
+  end
+
+  defp commands_list(bot_module) do
+    apply(bot_module, :commands, [])
+  end
+
+  defp command_predicate(command_module, response) do
+    apply(command_module, :predicate, [response])
+  end
+
+  defp command_handle(command_module, response) do
+    apply(command_module, :handle_event, [response])
   end
 
   defmacro defcommand(arg, opts, do: body) do
+    predicates = Keyword.fetch!(opts, :predicate)
+    permissions = Keyword.get(opts, :permissions, [])
+
     quote do
-      def predicate(event) do
-        VkBot.CommandsManager.predicate(event, unquote(opts))
+      def predicate(response) do
+        Predicates.predicate(response, unquote(predicates))
       end
 
       def handle_event(unquote(arg)) do
-        unquote(body)
+        case Permissions.check_permissions(unquote(arg), unquote(permissions)) do
+          :cont -> unquote(body)
+          {:halt, response} -> response
+        end
       end
     end
   end
 
-  def predicate(event, opts) do
-    opts = Enum.into(opts, @default_options)
-
-    [
-      &predicate_on_text/2,
-      &predicate_only_admin/2,
-      &predicate_in/2
-    ]
-    |> Enum.map(fn fun -> fun.(event, opts) end)
-    |> Enum.all?()
+  def handle_response(%Response{reply: reply, reply?: true}) do
+    VkBot.Api.exec_method("messages.send", Map.from_struct(reply))
   end
 
-  defp predicate_on_text(event, %{on_text: on_text}) do
-    text = fetch_text(event)
-
-    text
-    |> String.downcase()
-    |> String.starts_with?(on_text)
-  end
-
-  defp predicate_on_text(_event, _opts), do: true
-
-  defp predicate_only_admin(event, %{only_admin: true}) do
-    %{"peer_id" => peer_id, "from_id" => from_id} = fetch_message(event)
-
-    VkBot.Api.exec_method("messages.getConversationMembers", %{"peer_id" => peer_id})
-    |> Map.fetch!("items")
-    |> Enum.find(%{}, fn user -> Map.fetch!(user, "member_id") == from_id end)
-    |> Map.get("is_admin", false)
-  end
-
-  defp predicate_only_admin(_event, _opts), do: true
-
-  defp predicate_in(event, %{in: :chat}) do
-    %{"peer_id" => peer_id, "from_id" => from_id} = fetch_message(event)
-
-    peer_id != from_id
-  end
-
-  defp predicate_in(event, %{in: :pm}) do
-    %{"peer_id" => peer_id, "from_id" => from_id} = fetch_message(event)
-
-    peer_id == from_id
-  end
-
-  defp predicate_in(_event, _opts), do: true
-
-  def fetch_text(update) do
-    update
-    |> fetch_message()
-    |> Map.fetch!("text")
-  end
-
-  def fetch_peer_id(update) do
-    update
-    |> fetch_message()
-    |> Map.fetch!("peer_id")
-  end
-
-  def fetch_message(update) do
-    update
-    |> Map.fetch!("object")
-    |> Map.fetch!("message")
-  end
-
-  def handle_response({:ok, text}, event) when is_binary(text) do
-    peer_id = fetch_peer_id(event)
-
-    VkBot.Api.exec_method("messages.send", %{
-      "peer_id" => peer_id,
-      "random_id" => 0,
-      "message" => text
-    })
-  end
+  def handle_response(_response), do: nil
 end
