@@ -1,9 +1,9 @@
 defmodule VkBot.Examples.PingPongBot do
-  use VkBot
-
   alias VkBot.Examples.PingPongCommand
 
-  defcommands [
-    PingPongCommand
-  ]
+  def commands do
+    [
+      PingPongCommand
+    ]
+  end
 end

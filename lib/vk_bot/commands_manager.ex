@@ -1,25 +1,14 @@
 defmodule VkBot.CommandsManager do
   @default_options %{only_admin: false, in: :pm}
 
-  defmacro __using__(_opts) do
-    quote do
-      require VkBot.CommandsManager
-      import VkBot.CommandsManager
-    end
-  end
+  def handle_event(module, event) do
+    case Enum.find(apply(module, :commands, []), :not_found, &apply(&1, :predicate, [event])) do
+      :not_found ->
+        nil
 
-  defmacro defcommands(commands) when is_list(commands) do
-    quote do
-      def handle_event(event) do
-        case Enum.find(unquote(commands), :not_found, &apply(&1, :predicate, [event])) do
-          :not_found ->
-            nil
-
-          module ->
-            apply(module, :handle_event, [event])
-            |> handle_response(event)
-        end
-      end
+      command ->
+        apply(command, :handle_event, [event])
+        |> handle_response(event)
     end
   end
 
