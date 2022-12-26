@@ -1,4 +1,4 @@
-defmodule VkBot.Response do
+defmodule VkBot.Request do
   alias VkBot.Resposne.Reply
 
   defstruct ~w[message reply reply?]a
@@ -11,11 +11,11 @@ defmodule VkBot.Response do
     }
   end
 
-  def halt(%__MODULE__{} = response) do
-    Map.put(response, :reply?, false)
+  def halt(%__MODULE__{} = request) do
+    Map.put(request, :reply?, false)
   end
 
-  def reply_message(%__MODULE__{} = response, text) do
-    update_in(response.reply.message, fn _ -> text end)
+  def reply_message(%__MODULE__{} = request, text) do
+    update_in(request.reply.message, fn _ -> text end)
   end
 end
