@@ -3,8 +3,6 @@ defmodule VkBot.CommandsManager do
   alias VkBot.CommandsManager.Permissions
   alias VkBot.CommandsManager.Predicates
 
-  defdelegate reply_message(request, text), to: Request
-
   def handle_event(module, event) do
     request =
       event

@@ -1,5 +1,6 @@
 defmodule VkBot.Examples.PingPongCommand do
   import VkBot.CommandsManager
+  import VkBot.Request
 
   require VkBot.CommandsManager
 
