@@ -6,6 +6,6 @@ defmodule VkBot.Examples.PingPongCommand do
   defcommand request,
     predicate: [on_text: "/ping", in: :chat],
     permissions: [only_admin: true] do
-    reply_message(request, message: "pong")
+    reply_message(request, "pong")
   end
 end

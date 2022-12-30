@@ -4,10 +4,10 @@ defmodule VkBot.Request do
   defstruct ~w[message reply reply?]a
 
   @type t :: %__MODULE__{
-    message: map(),
-    reply: Reply.t(),
-    reply?: boolean
-  }
+          message: map(),
+          reply: Reply.t(),
+          reply?: boolean
+        }
 
   @spec new(map) :: __MODULE__.t()
   def new(message) do
@@ -23,9 +23,9 @@ defmodule VkBot.Request do
     Map.put(request, :reply?, false)
   end
 
-  @spec reply_message(__MODULE__.t(), Keyword.t()) :: __MODULE__.t()
-  def reply_message(%__MODULE__{} = request, opts) do
-    opts
+  @spec reply_message(__MODULE__.t(), String.t(), Keyword.t()) :: __MODULE__.t()
+  def reply_message(%__MODULE__{} = request, message, opts \\ []) do
+    [{:message, message} | opts]
     |> Enum.reduce(request, fn {key, value}, req ->
       update_in(req.reply, &Reply.set_field(&1, key, value))
     end)
