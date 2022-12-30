@@ -23,6 +23,8 @@ defmodule VkBot.MixProject do
     [
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.4"},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
     ]
   end
 end
