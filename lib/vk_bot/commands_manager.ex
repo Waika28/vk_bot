@@ -52,8 +52,9 @@ defmodule VkBot.CommandsManager do
     end
   end
 
+  @spec handle_request(Request.t()) :: map()
   def handle_request(%Request{reply: reply, reply?: true}) do
-    VkBot.Api.exec_method("messages.send", Map.from_struct(reply))
+    VkBot.Api.exec_method("messages.send", reply)
   end
 
   def handle_request(_request), do: nil
