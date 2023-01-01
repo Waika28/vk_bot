@@ -4,14 +4,20 @@ defmodule VkBot.Bot do
 
   defstruct ~w[module longpoll]a
 
-  def start_link(module, options \\ []) do
-    GenServer.start_link(__MODULE__, %__MODULE__{module: module}, options)
+  @in_test Application.compile_env(:vk_bot, :in_test, false)
+
+  def start_link(opts \\ []) do
+    bot_opts = Keyword.fetch!(opts, :bot_opts)
+    GenServer.start_link(__MODULE__, struct!(__MODULE__, bot_opts), opts)
   end
 
   @impl true
   def init(bot) do
-    send(self(), :init_longpoll)
-    send(self(), :process)
+    unless @in_test do
+      send(self(), :init_longpoll)
+      send(self(), :process)
+    end
+
     {:ok, bot}
   end
 
