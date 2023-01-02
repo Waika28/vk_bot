@@ -20,6 +20,6 @@ defmodule VkBot.CommandsManager.Permissions do
       do: :cont,
       else:
         {:halt,
-         VkBot.Request.reply_message(request, "Комманда доступа только для администраторов")}
+         VkBot.Request.reply_message(request, "Команда доступа только для администраторов")}
   end
 end
