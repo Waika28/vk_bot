@@ -24,7 +24,7 @@ defmodule VkBot.Request do
   end
 
   @spec reply_message(__MODULE__.t(), String.t(), Keyword.t()) :: __MODULE__.t()
-  def reply_message(%__MODULE__{} = request, message, opts \\ []) do
+  def reply_message(%__MODULE__{} = request, message \\ "", opts \\ []) do
     [{:message, message} | opts]
     |> Enum.reduce(request, fn {key, value}, req ->
       update_in(req.reply, &Reply.set_field(&1, key, value))

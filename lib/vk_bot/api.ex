@@ -26,6 +26,10 @@ defmodule VkBot.Api do
   def exec_method(method, params \\ %{}) when is_binary(method) do
     query =
       Map.merge(params, auth_fields())
+      |> Enum.map(fn
+        {key, value} when is_list(value) -> {key, Enum.join(value, ",")}
+        {key, value} -> {key, value}
+      end)
       |> URI.encode_query()
 
     URI.merge(@api_server, method)
